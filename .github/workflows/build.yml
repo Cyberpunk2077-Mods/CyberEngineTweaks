@@ -30,7 +30,7 @@ jobs:
         shell: pwsh
         run: |
           Get-ChildItem package -Recurse -Filter *.pdb | Remove-Item -Force
-          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '0.0.0' }
+          $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { $stable = @(git tag -l --sort=-v:refname | Where-Object { $_ -match '^v?\d+\.\d+\.\d+$' }); $any = @(git tag -l --sort=-v:refname | Where-Object { $_ -match '^v?\d' }); $tag = $(@($stable + $any) | Select-Object -First 1); if ($tag) { $tag.TrimStart('v') } else { '0.0.0' } }
           $suffix = if ($env:GITHUB_REF_TYPE -eq 'tag') { '' } else { "_$(Get-Date -Format 'yyyy.M').$((git rev-list --count --since="$(Get-Date -Day 1 -Format yyyy-MM-dd)" HEAD))" }
           $artifact = "${env:MOD_NAME}_v${version}_${env:TARGET_PLATFORM}_${env:TARGET_ARCH}${suffix}.zip"
           Compress-Archive -Path package/* -DestinationPath $artifact -CompressionLevel Optimal -Force
