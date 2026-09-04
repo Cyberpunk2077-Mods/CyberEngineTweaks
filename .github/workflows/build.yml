@@ -14,17 +14,22 @@ env:
 jobs:
   package:
     runs-on: windows-2025
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
       - uses: xmake-io/github-action-setup-xmake@v1
-      - name: Build windows_x64 package
+      - name: Configure windows_x64
+        shell: pwsh
         run: |
           xmake repo --update
-          xmake config --arch=x64 --mode=release --yes
-          xmake package
+          xmake f --arch=x64 --mode=release --yes
+      - name: Build
+        run: xmake -y
+      - name: Package
+        run: xmake package
       - name: Normalize artifact name
         id: meta
         shell: pwsh

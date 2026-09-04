@@ -33,6 +33,9 @@ add_requireconfs("**", { configs = {
     shared = false,
     vs_runtime = is_mode("release") and "MD" or "MDd" } })
 
+-- tiltedcore 0.2.7 does not pin mimalloc; xmake-repo latest is 3.x and breaks TiltedCore's Tests link (mi_malloc_size).
+add_requireconfs("*.mimalloc", { version = "2.2.4", override = true })
+
 add_requires("spdlog 1.11.0")
 add_requires("nlohmann_json")
 add_requires("hopscotch-map")
