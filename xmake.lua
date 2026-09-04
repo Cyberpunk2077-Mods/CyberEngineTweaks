@@ -3,6 +3,9 @@ set_xmakever("2.7.2")
 set_languages("cxx20")
 set_arch("x64")
 
+-- Local package overrides (tiltedcore Tests link, sol2 header-only install).
+add_repositories("cet-packages cet-repo", {rootdir = os.scriptdir()})
+
 add_rules("mode.debug","mode.releasedbg", "mode.release")
 add_rules("c.unity_build")
 
@@ -33,8 +36,12 @@ add_requireconfs("**", { configs = {
     shared = false,
     vs_runtime = is_mode("release") and "MD" or "MDd" } })
 
--- tiltedcore 0.2.7 does not pin mimalloc; xmake-repo latest is 3.x and breaks TiltedCore's Tests link (mi_malloc_size).
+-- tiltedcore / mimalloc: keep 2.x (3.x breaks TiltedCore's MimallocAllocator).
 add_requireconfs("*.mimalloc", { version = "2.2.4", override = true })
+
+-- imgui(freetype) -> freetype -> pkgconf -> meson -> python; 3.14 pip setuptools fails on GHA.
+add_requireconfs("python", { version = "3.12.10", override = true })
+add_requireconfs("*.python", { version = "3.12.10", override = true })
 
 add_requires("spdlog 1.11.0")
 add_requires("nlohmann_json")
