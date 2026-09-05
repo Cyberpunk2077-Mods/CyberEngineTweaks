@@ -1,7 +1,7 @@
 #pragma once
 
-#include "RED4ext/Api/v0/FileVer.hpp"
-#include "RED4ext/Api/SemVer.hpp"
+#include "RED4ext/Api/v1/FileVer.hpp"
+#include "RED4ext/Api/v1/SemVer.hpp"
 
 struct Image
 {
@@ -11,6 +11,6 @@ struct Image
 
     uintptr_t base_address;
     mem::region TextRegion;
-    RED4ext::v0::FileVer FileVersion{0, 0, 0, 0};
-    RED4ext::v0::SemVer SemVersion{0, 0, 0, 0};
+    RED4ext::v1::FileVer FileVersion{};
+    RED4ext::v1::SemVer SemVersion{};
 };
