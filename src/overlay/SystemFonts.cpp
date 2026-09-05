@@ -2,6 +2,8 @@
 
 #include "SystemFonts.h"
 
+#include "Utils.h"
+
 #include <shlobj.h>
 
 namespace
