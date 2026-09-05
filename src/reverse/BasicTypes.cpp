@@ -234,7 +234,7 @@ void Variant::Free()
         return;
 
     const RED4ext::rtti::IType* ownType = GetType();
-    const void* ownData = GetDataPtr();
+    void* ownData = GetDataPtr();
 
     if (ownData)
     {
