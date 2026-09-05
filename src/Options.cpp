@@ -77,6 +77,27 @@ void DeveloperSettings::ResetToDefaults()
     g_ImGuiAssertionsEnabled = EnableImGuiAssertions;
 }
 
+void UISettings::Load(const nlohmann::json& aConfig)
+{
+    Language = aConfig.value("language", Language);
+    LanguageConfigured = aConfig.value("language_configured", LanguageConfigured);
+    Theme = aConfig.value("theme", Theme);
+    SystemFontFamily = aConfig.value("system_font_family", SystemFontFamily);
+}
+
+nlohmann::json UISettings::Save() const
+{
+    return {{"language", Language},
+            {"language_configured", LanguageConfigured},
+            {"theme", Theme},
+            {"system_font_family", SystemFontFamily}};
+}
+
+void UISettings::ResetToDefaults()
+{
+    *this = {};
+}
+
 void Options::Load()
 {
     const auto path = GetAbsolutePath(m_paths.Config(), "", false);
@@ -109,12 +130,15 @@ void Options::Load()
     const auto& developerConfig = config["developer"];
     if (!developerConfig.empty())
         Developer.Load(developerConfig);
+
+    const auto& uiConfig = config["ui"];
+    if (!uiConfig.empty())
+        UI.Load(uiConfig);
 }
 
 void Options::Save() const
 {
-    nlohmann::json config = {{"patches", Patches.Save()}, {"font", Font.Save()}, {"developer", Developer.Save()}};
-
+    nlohmann::json config = {{"patches", Patches.Save()}, {"font", Font.Save()}, {"developer", Developer.Save()}, {"ui", UI.Save()}};
     const auto path = GetAbsolutePath(m_paths.Config(), "", true);
     std::ofstream o(path);
     o << config.dump(4) << std::endl;
@@ -125,6 +149,7 @@ void Options::ResetToDefaults()
     Patches.ResetToDefaults();
     Font.ResetToDefaults();
     Developer.ResetToDefaults();
+    UI.ResetToDefaults();
 
     Save();
 }

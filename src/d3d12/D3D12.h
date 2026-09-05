@@ -15,6 +15,8 @@ struct D3D12
     ~D3D12();
 
     void ReloadFonts();
+    // Re-apply UI theme/fonts from Options and rebuild ImGui font atlas / DX12 objects.
+    void ApplyUIStyleAndFonts();
 
     void SetTrapInputInImGui(const bool acEnabled);
     void DelayedSetTrapInputInImGui(const bool acEnabled);

@@ -50,6 +50,22 @@ struct DeveloperSettings
     bool EnableJIT{true};
 };
 
+struct UISettings
+{
+    void Load(const nlohmann::json& aConfig);
+    nlohmann::json Save() const;
+    void ResetToDefaults();
+
+    [[nodiscard]] auto operator<=>(const UISettings&) const = default;
+
+    // "auto" follows game/system language on first open until the user picks a language.
+    std::string Language{"auto"};
+    bool LanguageConfigured{false};
+    std::string Theme{"Default"};
+    // Empty = try Segoe UI / system default via FindFontFile; otherwise system font family name.
+    std::string SystemFontFamily{};
+};
+
 struct Options
 {
     Options(Paths& aPaths);
@@ -65,6 +81,7 @@ struct Options
     PatchesSettings Patches{};
     FontSettings Font{};
     DeveloperSettings Developer{};
+    UISettings UI{};
 
 private:
     Paths& m_paths;

@@ -3,6 +3,7 @@
 #include "Widget.h"
 
 #include <Options.h>
+#include <overlay/SystemFonts.h>
 
 struct LuaVM;
 struct Settings : Widget
@@ -22,9 +23,12 @@ protected:
 
 private:
     void UpdateAndDrawSetting(const std::string& acLabel, const std::string& acTooltip, bool& aCurrent, const bool& acSaved);
+    void DrawInterfaceSettings();
 
     PatchesSettings m_patches;
     DeveloperSettings m_developer;
+    UISettings m_ui;
+    std::vector<SystemFonts::Entry> m_systemFonts;
 
     Options& m_options;
     LuaVM& m_vm;

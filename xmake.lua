@@ -76,7 +76,7 @@ target("cyber_engine_tweaks")
     add_files("src/**.cpp", "src/**.rc")
     add_headerfiles("src/**.h")
     add_includedirs("src/", "build/")
-    add_syslinks("User32", "Version", "d3d11", "dxgi")
+    add_syslinks("User32", "Version", "d3d11", "dxgi", "Shell32", "Advapi32", "Gdi32")
     add_packages("spdlog", "nlohmann_json", "minhook", "hopscotch-map", "imgui", "mem", "sol2", "tiltedcore", "sqlite3", "openrestry-luajit", "xbyak", "stb")
     add_deps("RED4ext.SDK")
 
@@ -152,6 +152,9 @@ target("cyber_engine_tweaks")
 
         os.mkdir("package/bin/x64/plugins/cyber_engine_tweaks/fonts")
         os.cp("fonts/*", "package/bin/x64/plugins/cyber_engine_tweaks/fonts")
+
+        os.mkdir("package/bin/x64/plugins/cyber_engine_tweaks/locales")
+        os.cp("locales/*", "package/bin/x64/plugins/cyber_engine_tweaks/locales")
 
         os.cp("vendor/asiloader/*", "package/bin/x64/")
 

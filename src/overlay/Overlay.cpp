@@ -222,7 +222,7 @@ void Overlay::Update()
     const auto heightLimit = 2 * ImGui::GetFrameHeight() + 2 * ImGui::GetStyle().WindowPadding.y;
     ImGui::SetNextWindowPos({width * 0.25f, height * 0.05f}, ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSizeConstraints({width * 0.5f, heightLimit}, {FLT_MAX, heightLimit});
-    if (ImGui::Begin("Cyber Engine Tweaks"))
+    if (ImGui::Begin(CET::Get().GetLocalization().Get("overlay.title")))
         DrawToolbar();
     ImGui::End();
 
@@ -264,9 +264,10 @@ void Overlay::DrawToolbar()
 {
     const auto itemWidth = GetAlignedItemWidth(7);
     auto& persistentState = m_persistentState.Overlay;
+    auto& loc = CET::Get().GetLocalization();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.ConsoleToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("Console", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.console"), ImVec2(itemWidth, 0)))
         m_console.Toggle();
     if (!m_toggled)
         persistentState.ConsoleToggled = m_console.IsEnabled();
@@ -275,7 +276,7 @@ void Overlay::DrawToolbar()
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.BindingsToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("Bindings", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.bindings"), ImVec2(itemWidth, 0)))
         m_bindings.Toggle();
     if (!m_toggled)
         persistentState.BindingsToggled = m_bindings.IsEnabled();
@@ -284,7 +285,7 @@ void Overlay::DrawToolbar()
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.SettingsToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("Settings", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.settings"), ImVec2(itemWidth, 0)))
         m_settings.Toggle();
     if (!m_toggled)
         persistentState.SettingsToggled = m_settings.IsEnabled();
@@ -293,7 +294,7 @@ void Overlay::DrawToolbar()
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.TweakDBEditorToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("TweakDB Editor", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.tweakdb"), ImVec2(itemWidth, 0)))
         m_tweakDBEditor.Toggle();
     if (!m_toggled)
         persistentState.TweakDBEditorToggled = m_tweakDBEditor.IsEnabled();
@@ -302,7 +303,7 @@ void Overlay::DrawToolbar()
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.GameLogToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("Game Log", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.game_log"), ImVec2(itemWidth, 0)))
         m_gameLog.Toggle();
     if (!m_toggled)
         persistentState.GameLogToggled = m_gameLog.IsEnabled();
@@ -311,7 +312,7 @@ void Overlay::DrawToolbar()
     ImGui::SameLine();
 
     ImGui::PushStyleColor(ImGuiCol_Button, persistentState.ImGuiDebugToggled ? ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive) : ImGui::GetStyleColorVec4(ImGuiCol_Button));
-    if (ImGui::Button("ImGui Debug", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.imgui_debug"), ImVec2(itemWidth, 0)))
         m_imguiDebug.Toggle();
     if (!m_toggled)
         persistentState.ImGuiDebugToggled = m_imguiDebug.IsEnabled();
@@ -319,6 +320,6 @@ void Overlay::DrawToolbar()
 
     ImGui::SameLine();
 
-    if (ImGui::Button("Reload all mods", ImVec2(itemWidth, 0)))
+    if (ImGui::Button(loc.Get("overlay.reload_mods"), ImVec2(itemWidth, 0)))
         m_vm.ReloadAllMods();
 }

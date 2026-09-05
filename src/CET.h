@@ -5,6 +5,7 @@
 #include "PersistentState.h"
 #include "VKBindings.h"
 #include "d3d12/D3D12.h"
+#include "overlay/Localization.h"
 #include "overlay/Overlay.h"
 #include "scripting/LuaVM.h"
 
@@ -18,6 +19,7 @@ struct CET
 
     const Paths& GetPaths() const noexcept;
     const Options& GetOptions() const noexcept;
+    Localization& GetLocalization() noexcept;
     const PersistentState& GetPersistentState() const noexcept;
     D3D12& GetD3D12() noexcept;
     VKBindings& GetBindings() noexcept;
@@ -31,6 +33,7 @@ private:
 
     Paths m_paths;
     Options m_options;
+    Localization m_localization;
     PersistentState m_persistentState;
     VKBindings m_bindings;
     Window m_window;
