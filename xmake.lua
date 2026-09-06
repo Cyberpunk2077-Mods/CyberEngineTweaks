@@ -1,6 +1,7 @@
 set_xmakever("2.7.2")
 
 set_languages("cxx20")
+set_encodings("utf-8")
 set_arch("x64")
 
 -- Local package overrides (tiltedcore Tests link, sol2 header-only install).

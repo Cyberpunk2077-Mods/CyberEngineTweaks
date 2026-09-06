@@ -14,6 +14,7 @@ struct Localization
     struct LanguageInfo
     {
         const char* code; // game-style code, e.g. en-us
+        const char* englishName;
         const char* nativeName;
     };
 

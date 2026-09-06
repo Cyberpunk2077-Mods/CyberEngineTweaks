@@ -8,6 +8,24 @@
 #include <overlay/Themes.h>
 #include <Utils.h>
 
+namespace
+{
+const char* GetLanguageDisplayName(const Localization::LanguageInfo& aLanguage)
+{
+    const auto* font = ImGui::GetFont();
+    if (font == nullptr)
+        return aLanguage.englishName;
+
+    for (const wchar_t codepoint : UTF8ToUTF16(aLanguage.nativeName))
+    {
+        if (font->FindGlyphNoFallback(static_cast<ImWchar>(codepoint)) == nullptr)
+            return aLanguage.englishName;
+    }
+
+    return aLanguage.nativeName;
+}
+} // namespace
+
 Settings::Settings(Options& aOptions, LuaVM& aVm)
     : Widget("Settings")
     , m_options(aOptions)
@@ -81,7 +99,8 @@ void Settings::DrawInterfaceSettings()
         }
     }
 
-    const char* preview = languageIndex == 0 ? loc.Get("settings.language_auto") : languages[static_cast<size_t>(languageIndex - 1)].nativeName;
+    const char* preview =
+        languageIndex == 0 ? loc.Get("settings.language_auto") : GetLanguageDisplayName(languages[static_cast<size_t>(languageIndex - 1)]);
     if (ImGui::BeginCombo("##UI_Language", preview))
     {
         if (ImGui::Selectable(loc.Get("settings.language_auto"), languageIndex == 0))
@@ -92,7 +111,7 @@ void Settings::DrawInterfaceSettings()
         for (int i = 0; i < static_cast<int>(languages.size()); ++i)
         {
             const bool selected = languageIndex == i + 1;
-            if (ImGui::Selectable(languages[static_cast<size_t>(i)].nativeName, selected))
+            if (ImGui::Selectable(GetLanguageDisplayName(languages[static_cast<size_t>(i)]), selected))
             {
                 m_ui.Language = languages[static_cast<size_t>(i)].code;
                 languageIndex = i + 1;
