@@ -8,7 +8,7 @@ void ApplyCyberpunkColors(ImGuiStyle& style)
 {
     // Inspired by AMM Cyberpunk theme (yellow/cyan on dark magenta frame).
     auto* c = style.Colors;
-    c[ImGuiCol_Text] = ImVec4(224 / 255.f, 58 / 255.f, 68 / 255.f, 1.f);
+    c[ImGuiCol_Text] = ImVec4(252 / 255.f, 238 / 255.f, 10 / 255.f, 1.f);
     c[ImGuiCol_TextDisabled] = ImVec4(0.48f, 0.39f, 0.40f, 1.f);
     c[ImGuiCol_WindowBg] = ImVec4(0.06f, 0.05f, 0.07f, 0.94f);
     c[ImGuiCol_ChildBg] = ImVec4(0.08f, 0.06f, 0.08f, 0.80f);
