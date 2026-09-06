@@ -277,10 +277,6 @@ void Settings::Save() const
     m_options.UI.LanguageConfigured = !m_ui.Language.empty() && m_ui.Language != Localization::kAuto;
 
     m_options.Save();
-
-    auto& cet = CET::Get();
-    cet.GetLocalization().SetLanguage(m_options.UI.Language);
-    cet.GetD3D12().ApplyUIStyleAndFonts();
 }
 
 void Settings::ResetToDefaults()
@@ -290,10 +286,6 @@ void Settings::ResetToDefaults()
     m_patches = m_options.Patches;
     m_developer = m_options.Developer;
     m_ui = m_options.UI;
-
-    auto& cet = CET::Get();
-    cet.GetLocalization().SetLanguage(m_options.UI.Language);
-    cet.GetD3D12().ApplyUIStyleAndFonts();
 }
 
 void Settings::UpdateAndDrawSetting(const std::string& acLabel, const std::string& acTooltip, bool& aCurrent, const bool& acSaved)

@@ -225,30 +225,6 @@ void D3D12::ReloadFonts()
         Log::Warn("D3D12::ReloadFonts() - Missing materialdesignicons.ttf!");
 }
 
-void D3D12::ApplyUIStyleAndFonts()
-{
-    Themes::Apply(m_styleReference, m_options.UI.Theme);
-
-    {
-        std::lock_guard _(m_imguiLock);
-        if (ImGui::GetCurrentContext() != nullptr)
-        {
-            const auto [resx, resy] = m_outSize;
-            const auto scaleFromReference = std::min(static_cast<float>(resx) / 1920.0f, static_cast<float>(resy) / 1080.0f);
-            ImGui::GetStyle() = m_styleReference;
-            ImGui::GetStyle().ScaleAllSizes(scaleFromReference);
-        }
-    }
-
-    ReloadFonts();
-
-    if (m_initialized && m_pCommandQueue)
-    {
-        ImGui_ImplDX12_InvalidateDeviceObjects();
-        ImGui_ImplDX12_CreateDeviceObjects(m_pCommandQueue.Get());
-    }
-}
-
 bool D3D12::InitializeImGui(size_t aBuffersCounts)
 {
     std::lock_guard _(m_imguiLock);
