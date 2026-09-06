@@ -21,6 +21,8 @@ jobs:
           fetch-depth: 0
           submodules: recursive
       - uses: xmake-io/github-action-setup-xmake@v1
+      - name: Verify localization resources
+        run: python tools/verify_locales.py
       - name: Configure windows_x64
         shell: pwsh
         run: |

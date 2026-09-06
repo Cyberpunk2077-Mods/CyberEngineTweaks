@@ -22,7 +22,8 @@ void Overlay::PostInitialize()
         else
         {
             const auto cOverlayBindCode = CET::Get().GetBindings().GetBindCodeForModBind(Bindings::GetOverlayToggleModBind());
-            ImGui::InsertNotification({ToastType::Info, NOTIFY_DEFAULT_DISMISS, "CET Overlay Bind: %s", VKBindings::GetBindString(cOverlayBindCode).c_str()});
+            ImGui::InsertNotification(
+                {ToastType::Info, NOTIFY_DEFAULT_DISMISS, CET::Get().GetLocalization().Get("overlay.bind_notification"), VKBindings::GetBindString(cOverlayBindCode).c_str()});
         }
 
         m_initialized = true;

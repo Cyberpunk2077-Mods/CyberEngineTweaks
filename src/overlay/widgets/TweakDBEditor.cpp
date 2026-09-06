@@ -123,17 +123,18 @@ bool StringContains(const std::string_view& acString, const std::string_view& ac
 }
 
 TweakDBEditor::TweakDBEditor(LuaVM& aVm)
-    : Widget("TweakDB Editor")
+    : Widget("overlay.tweakdb")
     , m_vm(aVm)
 {
 }
 
 void TweakDBEditor::OnUpdate()
 {
+    const auto& loc = CET::Get().GetLocalization();
     // LuaVM is initialized after TweakDB, let's wait for it
     if (!m_vm.IsInitialized())
     {
-        ImGui::TextUnformatted("TweakDB is not initialized yet");
+        ImGui::TextUnformatted(loc.Get("tweakdb.not_initialized"));
         return;
     }
 
@@ -141,13 +142,13 @@ void TweakDBEditor::OnUpdate()
     {
         RebuildCache();
 
-        ImGui::TextUnformatted("Rebuilding cache...");
+        ImGui::TextUnformatted(loc.Get("tweakdb.rebuilding_cache"));
         return;
     }
 
     if (ImGui::BeginTabBar("TweakDBEditor-Bar"))
     {
-        if (ImGui::BeginTabItem("Records"))
+        if (ImGui::BeginTabItem(loc.Get("tweakdb.records")))
         {
             ImGui::BeginChild("Records");
             DrawRecordsTab();
@@ -155,7 +156,7 @@ void TweakDBEditor::OnUpdate()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Queries"))
+        if (ImGui::BeginTabItem(loc.Get("tweakdb.queries")))
         {
             ImGui::BeginChild("Queries");
             DrawQueriesTab();
@@ -163,7 +164,7 @@ void TweakDBEditor::OnUpdate()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Flats"))
+        if (ImGui::BeginTabItem(loc.Get("tweakdb.flats")))
         {
             ImGui::BeginChild("Flats");
             DrawFlatsTab();
@@ -171,7 +172,7 @@ void TweakDBEditor::OnUpdate()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("Advanced"))
+        if (ImGui::BeginTabItem(loc.Get("tweakdb.advanced")))
         {
             ImGui::BeginChild("Advanced");
             DrawAdvancedTab();
@@ -250,6 +251,7 @@ void TweakDBEditor::RefreshRecords()
 
 void TweakDBEditor::RefreshFlats()
 {
+    const auto& loc = CET::Get().GetLocalization();
     auto* pTDB = RED4ext::TweakDB::Get();
     constexpr uint64_t unknownGroupHash = RED4ext::FNV1a64("!Unknown!");
     constexpr uint64_t badGroupHash = RED4ext::FNV1a64("!BadName!");
@@ -288,12 +290,12 @@ void TweakDBEditor::RefreshFlats()
             std::string flatName;
             const bool unknownFlatName = !GetTweakDBIDStringFlat(dbid, flatName);
             if (unknownFlatName)
-                cacheFlat(unknownGroupHash, "!Unknown!", std::move(flatName), dbid);
+                cacheFlat(unknownGroupHash, loc.Get("tweakdb.unknown_group"), std::move(flatName), dbid);
             else
             {
                 size_t idx = flatName.find('.');
                 if (idx == std::string::npos)
-                    cacheFlat(badGroupHash, "!BadName!", std::move(flatName), dbid);
+                    cacheFlat(badGroupHash, loc.Get("tweakdb.bad_name"), std::move(flatName), dbid);
                 else
                 {
                     // < 1 || > size = group as much as possible
@@ -318,13 +320,13 @@ void TweakDBEditor::RefreshFlats()
     if (const auto it = cachedFlatGroupsMap.find(unknownGroupHash); it != cachedFlatGroupsMap.cend())
     {
         auto& group = m_cachedFlatGroups[it.value()];
-        group.m_name = fmt::format("{} - {} flats!", group.m_name, group.m_flats.size());
+        group.m_name = fmt::format(fmt::runtime(loc.Get("tweakdb.flat_count")), group.m_name, group.m_flats.size());
     }
 
     if (const auto it = cachedFlatGroupsMap.find(badGroupHash); it != cachedFlatGroupsMap.cend())
     {
         auto& group = m_cachedFlatGroups[it.value()];
-        group.m_name = fmt::format("{} - {} flats!", group.m_name, group.m_flats.size());
+        group.m_name = fmt::format(fmt::runtime(loc.Get("tweakdb.flat_count")), group.m_name, group.m_flats.size());
     }
 
     std::ranges::sort(m_cachedFlatGroups, [](const CachedFlatGroup& acLeft, const CachedFlatGroup& acRight) { return SortString(acLeft.m_name, acRight.m_name); });
@@ -449,6 +451,7 @@ void TweakDBEditor::FilterFlats()
 
 bool TweakDBEditor::DrawRecordDropdown(const char* acpLabel, RED4ext::TweakDBID& aDBID, float aWidth)
 {
+    const auto& loc = CET::Get().GetLocalization();
     bool valueChanged = false;
     if (aWidth != 0.0f)
         ImGui::SetNextItemWidth(aWidth);
@@ -464,14 +467,14 @@ bool TweakDBEditor::DrawRecordDropdown(const char* acpLabel, RED4ext::TweakDBID&
         }
         else
         {
-            ImGui::SetTooltipUnformatted("ERROR_RECORD_NOT_FOUND");
+            ImGui::SetTooltipUnformatted(loc.Get("tweakdb.error_record_not_found"));
         }
     }
     if (comboOpened)
     {
         static float searchTimer = 0.0f;
         ImGui::SetNextItemWidth(-FLT_MIN);
-        if (ImGui::InputTextWithHint("##dropdownSearch", "Search", s_tweakdbidFilterBuffer, sizeof(s_tweakdbidFilterBuffer)))
+        if (ImGui::InputTextWithHint("##dropdownSearch", loc.Get("common.search"), s_tweakdbidFilterBuffer, sizeof(s_tweakdbidFilterBuffer)))
         {
             searchTimer = c_searchDelay;
         }
@@ -569,11 +572,12 @@ bool TweakDBEditor::GetTweakDBIDStringQuery(RED4ext::TweakDBID aDBID, std::strin
 
 bool TweakDBEditor::DrawFlat(RED4ext::TweakDBID aDBID)
 {
+    const auto& loc = CET::Get().GetLocalization();
     RED4ext::CStackType data = TweakDB::InternalGetFlat(aDBID);
 
     if (!data.value)
     {
-        ImGui::Text("'%s' is not found in TweakDB", GetTweakDBIDStringFlat(aDBID.value & 0xFFFFFFFFFF).c_str());
+        ImGui::Text(loc.Get("tweakdb.flat_not_found"), GetTweakDBIDStringFlat(aDBID.value & 0xFFFFFFFFFF).c_str());
         return false;
     }
 
@@ -588,6 +592,7 @@ bool TweakDBEditor::DrawFlat(RED4ext::TweakDBID aDBID)
 
 bool TweakDBEditor::DrawFlat(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     static auto* pRTTI = RED4ext::CRTTISystem::Get();
     static auto* pTweakDBIDType = pRTTI->GetType("TweakDBID");
     static auto* pQuaternionType = pRTTI->GetType("Quaternion");
@@ -633,13 +638,14 @@ bool TweakDBEditor::DrawFlat(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aSta
         return DrawFlatInt32(aDBID, aStackType, aReadOnly);
 
     const auto typeName = aStackType.type->GetName();
-    ImGui::Text("unsupported type: %s", typeName.ToString());
+    ImGui::Text(loc.Get("tweakdb.unsupported_type"), typeName.ToString());
     return false;
 }
 
 // Needs a refactor
 bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly, bool aCollapsable)
 {
+    const auto& loc = CET::Get().GetLocalization();
     static TiltedPhoques::Map<uint64_t, void*> editedArrays;
 
     auto* pArrayType = reinterpret_cast<RED4ext::CRTTIArrayType*>(aStackType.type);
@@ -666,9 +672,9 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
     }
 
     uint32_t arraySize = pArrayType->GetLength(arrayInstance);
-    if (!aCollapsable || ImGui::TreeNode("", "[%s] %u items", arrayTypeName.ToString(), arraySize))
+    if (!aCollapsable || ImGui::TreeNode("", loc.Get("tweakdb.array_items"), arrayTypeName.ToString(), arraySize))
     {
-        if (!aReadOnly && ImGui::Button("clear"))
+        if (!aReadOnly && ImGui::Button(loc.Get("common.clear")))
         {
             pArrayType->Resize(arrayInstance, 0);
             arraySize = 0;
@@ -679,7 +685,7 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
             uint64_t arrayKey = aDBID.value & 0xFFFFFFFFFF;
             if (!isCached)
             {
-                if (ImGui::Button("edit"))
+                if (ImGui::Button(loc.Get("common.edit")))
                 {
                     auto* allocator = pArrayType->GetAllocator();
                     auto result = allocator->AllocAligned(pArrayType->GetSize(), pArrayType->GetAlignment());
@@ -691,7 +697,7 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
             else
             {
                 ImGui::SameLine();
-                if (ImGui::Button("cancel"))
+                if (ImGui::Button(loc.Get("common.cancel")))
                 {
                     pArrayType->Destruct(arrayInstance);
                     pArrayType->GetAllocator()->Free(arrayInstance);
@@ -704,7 +710,7 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
                     isCached = false;
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("save"))
+                if (ImGui::Button(loc.Get("common.save")))
                 {
                     const RED4ext::CStackType newStackType(aStackType.type, arrayInstance);
                     isModified = TweakDB::InternalSetFlat(aDBID, newStackType);
@@ -768,7 +774,7 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
-            if (!aReadOnly && ImGui::Button("add new"))
+            if (!aReadOnly && ImGui::Button(loc.Get("common.add_new")))
             {
                 pArrayType->InsertAt(arrayInstance, arraySize);
                 pArrayInnerType->Construct(pArrayType->GetElement(arrayInstance, arraySize));
@@ -796,6 +802,7 @@ bool TweakDBEditor::DrawFlatArray(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
 
 bool TweakDBEditor::DrawFlatTweakDBID(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     const auto* pDBID = static_cast<RED4ext::TweakDBID*>(aStackType.value);
 
     if (aReadOnly)
@@ -814,7 +821,7 @@ bool TweakDBEditor::DrawFlatTweakDBID(RED4ext::TweakDBID aDBID, RED4ext::CStackT
             }
             else
             {
-                ImGui::SetTooltipUnformatted("ERROR_RECORD_NOT_FOUND");
+                ImGui::SetTooltipUnformatted(loc.Get("tweakdb.error_record_not_found"));
             }
         }
 
@@ -900,6 +907,7 @@ bool TweakDBEditor::DrawFlatQuaternion(RED4ext::TweakDBID aDBID, RED4ext::CStack
 
 bool TweakDBEditor::DrawFlatEulerAngles(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     const auto* pEular = static_cast<RED4ext::EulerAngles*>(aStackType.value);
 
     float roll = pEular->Roll;
@@ -908,17 +916,17 @@ bool TweakDBEditor::DrawFlatEulerAngles(RED4ext::TweakDBID aDBID, RED4ext::CStac
 
     const int32_t flags = aReadOnly ? ImGuiInputTextFlags_ReadOnly : ImGuiInputTextFlags_EnterReturnsTrue;
 
-    ImGui::TextUnformatted("Roll ");
+    ImGui::TextUnformatted(loc.Get("tweakdb.roll"));
     ImGui::SameLine();
     ImGui::SetNextItemWidth(-FLT_MIN);
     bool valueChanged = ImGui::InputFloat("##Roll", &roll, 0.0f, 0.0f, "%f", flags);
 
-    ImGui::TextUnformatted("Pitch");
+    ImGui::TextUnformatted(loc.Get("tweakdb.pitch"));
     ImGui::SameLine();
     ImGui::SetNextItemWidth(-FLT_MIN);
     valueChanged |= ImGui::InputFloat("##Pitch", &pitch, 0.0f, 0.0f, "%f", flags);
 
-    ImGui::TextUnformatted("Yaw  ");
+    ImGui::TextUnformatted(loc.Get("tweakdb.yaw"));
     ImGui::SameLine();
     ImGui::SetNextItemWidth(-FLT_MIN);
     valueChanged |= ImGui::InputFloat("##Yaw", &yaw, 0.0f, 0.0f, "%f", flags);
@@ -1037,7 +1045,7 @@ bool TweakDBEditor::DrawFlatColor(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
     rgba[3] = pColor->Alpha / 255.0f;
 
     aReadOnly = true;
-    ImGui::TextUnformatted("'Color' is not supported yet");
+    ImGui::TextUnformatted(CET::Get().GetLocalization().Get("tweakdb.color_not_supported"));
     ImGui::SameLine();
 
     const int32_t flags = aReadOnly ? ImGuiColorEditFlags_NoInputs : ImGuiColorEditFlags_None;
@@ -1071,9 +1079,10 @@ bool TweakDBEditor::DrawFlatColor(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
 
 bool TweakDBEditor::DrawFlatLocKeyWrapper(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     const auto* pLocKey = static_cast<RED4ext::gamedataLocKeyWrapper*>(aStackType.value);
 
-    ImGui::TextUnformatted("This is a LocalizationKey");
+    ImGui::TextUnformatted(loc.Get("tweakdb.localization_key"));
     ImGui::TextUnformatted("Game.GetLocalizedTextByKey(...)");
 
     uint64_t key = pLocKey->primaryKey;
@@ -1108,6 +1117,7 @@ bool TweakDBEditor::DrawFlatLocKeyWrapper(RED4ext::TweakDBID aDBID, RED4ext::CSt
 
 bool TweakDBEditor::DrawFlatResourceAsyncRef(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     const auto* pRaRef = static_cast<RED4ext::ResourceAsyncReference<void>*>(aStackType.value);
 
     uint64_t hashRef = pRaRef->path.hash;
@@ -1128,7 +1138,7 @@ bool TweakDBEditor::DrawFlatResourceAsyncRef(RED4ext::TweakDBID aDBID, RED4ext::
             static int resourcesCount = 0;
             static char comboSearchStr[256]{};
             ImGui::SetNextItemWidth(-FLT_MIN);
-            if (ImGui::InputTextWithHint("##dropdownSearch", "Search", comboSearchStr, sizeof(comboSearchStr)))
+            if (ImGui::InputTextWithHint("##dropdownSearch", loc.Get("common.search"), comboSearchStr, sizeof(comboSearchStr)))
             {
                 searchTimer = c_searchDelay;
             }
@@ -1229,9 +1239,10 @@ bool TweakDBEditor::DrawFlatResourceAsyncRef(RED4ext::TweakDBID aDBID, RED4ext::
 
 bool TweakDBEditor::DrawFlatCName(RED4ext::TweakDBID aDBID, RED4ext::CStackType& aStackType, bool aReadOnly)
 {
+    const auto& loc = CET::Get().GetLocalization();
     const auto* pCName = static_cast<RED4ext::CName*>(aStackType.value);
 
-    ImGui::TextUnformatted("Game is expecting specific values.");
+    ImGui::TextUnformatted(loc.Get("tweakdb.specific_values"));
     // Is it worth it to implement a dropdown like DrawTweakDBID?
 
     RED4ext::CName newCName;
@@ -1381,15 +1392,17 @@ bool TweakDBEditor::DrawFlatInt32(RED4ext::TweakDBID aDBID, RED4ext::CStackType&
 
 void TweakDBEditor::DrawRecordsTab()
 {
+    const auto& loc = CET::Get().GetLocalization();
     static float searchTimer = 0.0f;
     ImGui::SetNextItemWidth(
-        -(ImGui::GetFrameHeight() + ImGui::CalcTextSize("Regex").x + ImGui::GetStyle().ItemSpacing.x + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::GetStyle().FramePadding.x));
-    if (ImGui::InputTextWithHint("##search", "Search", s_recordsFilterBuffer, sizeof(s_recordsFilterBuffer)))
+        -(ImGui::GetFrameHeight() + ImGui::CalcTextSize(loc.Get("common.regex")).x + ImGui::GetStyle().ItemSpacing.x + ImGui::GetStyle().ItemInnerSpacing.x +
+          ImGui::GetStyle().FramePadding.x));
+    if (ImGui::InputTextWithHint("##search", loc.Get("common.search"), s_recordsFilterBuffer, sizeof(s_recordsFilterBuffer)))
     {
         searchTimer = c_searchDelay;
     }
     ImGui::SameLine();
-    if (ImGui::Checkbox("Regex", &s_recordsFilterIsRegex))
+    if (ImGui::Checkbox(loc.Get("common.regex"), &s_recordsFilterIsRegex))
     {
         searchTimer = -1.0f;
     }
@@ -1454,7 +1467,7 @@ void TweakDBEditor::DrawRecordsTab()
                             ImGui::TableNextColumn();
                             if (flat.m_isMissing)
                             {
-                                ImGui::TextUnformatted("ERROR_FLAT_NOT_FOUND");
+                                ImGui::TextUnformatted(loc.Get("tweakdb.error_flat_not_found"));
                             }
                             else
                             {
@@ -1507,15 +1520,17 @@ void TweakDBEditor::DrawQueriesTab()
 
 void TweakDBEditor::DrawFlatsTab()
 {
+    const auto& loc = CET::Get().GetLocalization();
     static float searchTimer = 0.0f;
     ImGui::SetNextItemWidth(
-        -(ImGui::GetFrameHeight() + ImGui::CalcTextSize("Regex").x + ImGui::GetStyle().ItemSpacing.x + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::GetStyle().FramePadding.x));
-    if (ImGui::InputTextWithHint("##search", "Search", s_flatsFilterBuffer, sizeof(s_flatsFilterBuffer)))
+        -(ImGui::GetFrameHeight() + ImGui::CalcTextSize(loc.Get("common.regex")).x + ImGui::GetStyle().ItemSpacing.x + ImGui::GetStyle().ItemInnerSpacing.x +
+          ImGui::GetStyle().FramePadding.x));
+    if (ImGui::InputTextWithHint("##search", loc.Get("common.search"), s_flatsFilterBuffer, sizeof(s_flatsFilterBuffer)))
     {
         searchTimer = c_searchDelay;
     }
     ImGui::SameLine();
-    if (ImGui::Checkbox("Regex", &s_flatsFilterIsRegex))
+    if (ImGui::Checkbox(loc.Get("common.regex"), &s_flatsFilterIsRegex))
     {
         searchTimer = -1.0f;
     }
@@ -1572,7 +1587,7 @@ void TweakDBEditor::DrawFlatsTab()
                     ImGui::TableNextColumn();
                     if (flat.m_isMissing)
                     {
-                        ImGui::TextUnformatted("ERROR_FLAT_NOT_FOUND");
+                        ImGui::TextUnformatted(loc.Get("tweakdb.error_flat_not_found"));
                     }
                     else
                     {
@@ -1593,16 +1608,17 @@ void TweakDBEditor::DrawFlatsTab()
 
 void TweakDBEditor::DrawAdvancedTab()
 {
+    const auto& loc = CET::Get().GetLocalization();
 
-    if (ImGui::InputScalar("'Flats' Grouping depth", ImGuiDataType_S8, &m_flatGroupNameDepth, nullptr, nullptr, nullptr, ImGuiInputTextFlags_EnterReturnsTrue))
+    if (ImGui::InputScalar(loc.Get("tweakdb.grouping_depth"), ImGuiDataType_S8, &m_flatGroupNameDepth, nullptr, nullptr, nullptr, ImGuiInputTextFlags_EnterReturnsTrue))
     {
         RefreshFlats();
         FilterFlats();
     }
 
-    ImGui::InputFloat("ComboBox dropdown height", &g_comboDropdownHeight, 0, 0);
+    ImGui::InputFloat(loc.Get("tweakdb.dropdown_height"), &g_comboDropdownHeight, 0, 0);
 
-    if (ImGui::Button("Refresh all"))
+    if (ImGui::Button(loc.Get("tweakdb.refresh_all")))
     {
         // prompt widget reinitialization
         m_initialized = false;
@@ -1617,26 +1633,26 @@ void TweakDBEditor::DrawAdvancedTab()
         static RED4ext::TweakDBID clonedRecordDBID;
         static RED4ext::CName recordTypeName;
 
-        constexpr auto SetStatus = [](const char* acpStatus)
+        const auto SetStatus = [](const char* acpStatus)
         {
             status = acpStatus;
             statusTimer = 2.5f;
         };
 
-        ImGui::InputText("Record name", recordName, sizeof(recordName));
+        ImGui::InputText(loc.Get("tweakdb.record_name"), recordName, sizeof(recordName));
 
-        if (ImGui::Button("Delete Record"))
+        if (ImGui::Button(loc.Get("tweakdb.delete_record")))
         {
             if (TweakDB::InternalDeleteRecord(RED4ext::TweakDBID(recordName), spdlog::get("scripting")))
-                SetStatus("Success!");
+                SetStatus(loc.Get("common.success"));
             else
-                SetStatus("Failed. check console!");
+                SetStatus(loc.Get("common.failed_check_console"));
         }
 
-        if (ImGui::BeginCombo("Record type to create", recordTypeName.ToString(), ImGuiComboFlags_HeightLargest))
+        if (ImGui::BeginCombo(loc.Get("tweakdb.record_type"), recordTypeName.ToString(), ImGuiComboFlags_HeightLargest))
         {
             ImGui::SetNextItemWidth(-FLT_MIN);
-            ImGui::InputTextWithHint("##dropdownSearch", "Search", comboSearchBuffer, sizeof(comboSearchBuffer));
+            ImGui::InputTextWithHint("##dropdownSearch", loc.Get("common.search"), comboSearchBuffer, sizeof(comboSearchBuffer));
             if (ImGui::BeginChild("##dropdownScroll", ImVec2(0, g_comboDropdownHeight)))
             {
                 for (const auto& recordGroup : m_cachedRecords)
@@ -1663,22 +1679,22 @@ void TweakDBEditor::DrawAdvancedTab()
             ImGui::EndCombo();
         }
 
-        if (ImGui::Button("Create record"))
+        if (ImGui::Button(loc.Get("tweakdb.create_record")))
         {
             if (TweakDB::InternalCreateRecord(recordName, recordTypeName.ToString(), spdlog::get("scripting")))
-                SetStatus("Success!");
+                SetStatus(loc.Get("common.success"));
             else
-                SetStatus("Failed. check console!");
+                SetStatus(loc.Get("common.failed_check_console"));
         }
 
-        DrawRecordDropdown("Record to clone", clonedRecordDBID);
+        DrawRecordDropdown(loc.Get("tweakdb.record_to_clone"), clonedRecordDBID);
 
-        if (ImGui::Button("Clone record"))
+        if (ImGui::Button(loc.Get("tweakdb.clone_record")))
         {
             if (TweakDB::InternalCloneRecord(recordName, clonedRecordDBID, spdlog::get("scripting")))
-                SetStatus("Success!");
+                SetStatus(loc.Get("common.success"));
             else
-                SetStatus("Failed. check console!");
+                SetStatus(loc.Get("common.failed_check_console"));
         }
 
         if (statusTimer != 0.0f)

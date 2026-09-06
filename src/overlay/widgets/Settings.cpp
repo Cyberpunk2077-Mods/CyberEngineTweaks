@@ -27,7 +27,7 @@ const char* GetLanguageDisplayName(const Localization::LanguageInfo& aLanguage)
 } // namespace
 
 Settings::Settings(Options& aOptions, LuaVM& aVm)
-    : Widget("Settings")
+    : Widget("overlay.settings")
     , m_options(aOptions)
     , m_vm(aVm)
 {

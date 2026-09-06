@@ -169,9 +169,9 @@ void D3D12::ReloadFonts()
 
     const auto& resolvedLang = CET::Get().GetLocalization().GetResolvedLanguage();
     const ImWchar* cpGlyphRanges = io.Fonts->GetGlyphRangesDefault();
-    if (resolvedLang == "zh-cn")
-        cpGlyphRanges = io.Fonts->GetGlyphRangesChineseSimplifiedCommon();
-    else if (resolvedLang == "zh-tw")
+    // The simplified-common preset is a limited subset, not full Simplified
+    // Chinese coverage. UI translations and TweakDB text need the full range.
+    if (resolvedLang == "zh-cn" || resolvedLang == "zh-tw")
         cpGlyphRanges = io.Fonts->GetGlyphRangesChineseFull();
     else if (resolvedLang == "jp-jp")
         cpGlyphRanges = io.Fonts->GetGlyphRangesJapanese();

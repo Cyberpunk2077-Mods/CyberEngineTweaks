@@ -2,6 +2,7 @@
 
 #include "Utils.h"
 
+#include <CET.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 
 void ltrim(std::string& s)
@@ -189,7 +190,8 @@ float GetCenteredOffsetForText(const char* acpText)
 TChangedCBResult UnsavedChangesPopup(
     const std::string& acpOwnerName, bool& aFirstTime, const bool acMadeChanges, const TWidgetCB& acpSaveCB, const TWidgetCB& acpLoadCB, const TWidgetCB& acpCancelCB)
 {
-    auto popupTitle = acpOwnerName.empty() ? "Unsaved changes" : fmt::format("{} - Unsaved changes", acpOwnerName);
+    const auto& loc = CET::Get().GetLocalization();
+    auto popupTitle = acpOwnerName.empty() ? loc.Get("common.unsaved_changes") : fmt::format(fmt::runtime(loc.Get("common.unsaved_changes_title")), acpOwnerName);
 
     if (acMadeChanges)
     {
@@ -203,18 +205,18 @@ TChangedCBResult UnsavedChangesPopup(
 
         if (ImGui::BeginPopupModal(popupTitle.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            const auto shorterTextSz{ImGui::CalcTextSize("You have some unsaved changes.").x};
-            const auto longerTextSz{ImGui::CalcTextSize("Do you wish to apply them or discard them?").x};
+            const auto shorterTextSz{ImGui::CalcTextSize(loc.Get("common.unsaved_changes_message")).x};
+            const auto longerTextSz{ImGui::CalcTextSize(loc.Get("common.unsaved_changes_question")).x};
             const auto diffTextSz{longerTextSz - shorterTextSz};
 
             ImGui::SetCursorPosX(diffTextSz / 2);
-            ImGui::TextUnformatted("You have some unsaved changes.");
-            ImGui::TextUnformatted("Do you wish to apply them or discard them?");
+            ImGui::TextUnformatted(loc.Get("common.unsaved_changes_message"));
+            ImGui::TextUnformatted(loc.Get("common.unsaved_changes_question"));
             ImGui::Separator();
 
             const auto itemWidth = GetAlignedItemWidth(3);
 
-            if (ImGui::Button("Apply", ImVec2(itemWidth, 0)))
+            if (ImGui::Button(loc.Get("common.apply"), ImVec2(itemWidth, 0)))
             {
                 if (acpSaveCB)
                     acpSaveCB();
@@ -223,7 +225,7 @@ TChangedCBResult UnsavedChangesPopup(
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Discard", ImVec2(itemWidth, 0)))
+            if (ImGui::Button(loc.Get("common.discard"), ImVec2(itemWidth, 0)))
             {
                 if (acpLoadCB)
                     acpLoadCB();
@@ -232,7 +234,7 @@ TChangedCBResult UnsavedChangesPopup(
                 ImGui::CloseCurrentPopup();
             }
             ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(itemWidth, 0)))
+            if (ImGui::Button(loc.Get("common.cancel"), ImVec2(itemWidth, 0)))
             {
                 if (acpCancelCB)
                     acpCancelCB();

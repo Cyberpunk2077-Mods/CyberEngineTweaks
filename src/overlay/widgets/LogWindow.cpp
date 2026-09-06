@@ -2,6 +2,7 @@
 
 #include "LogWindow.h"
 
+#include <CET.h>
 #include <Utils.h>
 
 LogWindow::LogWindow(const std::string& acpLoggerName)
@@ -16,7 +17,8 @@ void LogWindow::Draw(const ImVec2& size)
 {
     const auto itemWidth = GetAlignedItemWidth(2);
 
-    if (ImGui::Button("Clear output", ImVec2(itemWidth, 0)))
+    const auto& loc = CET::Get().GetLocalization();
+    if (ImGui::Button(loc.Get("log.clear_output"), ImVec2(itemWidth, 0)))
     {
         m_normalizedWidth = -1.0f;
         std::lock_guard _{m_lock};
@@ -24,7 +26,7 @@ void LogWindow::Draw(const ImVec2& size)
         m_lines.clear();
     }
     ImGui::SameLine();
-    ImGui::Checkbox("Auto-scroll", &m_shouldScroll);
+    ImGui::Checkbox(loc.Get("log.auto_scroll"), &m_shouldScroll);
 
     const auto& style = ImGui::GetStyle();
 

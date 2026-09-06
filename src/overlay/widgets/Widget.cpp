@@ -96,7 +96,9 @@ void Widget::Draw()
         ImGui::SetNextWindowPos(ImVec2(width * 0.2f, height * 0.2f), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSize(ImVec2(width * 0.6f, height * 0.6f), ImGuiCond_FirstUseEver);
         ImGui::SetNextWindowSizeConstraints(ImVec2(420, 315), ImVec2(FLT_MAX, FLT_MAX));
-        if (ImGui::Begin(m_name.c_str(), &newEnabled))
+        const auto& loc = CET::Get().GetLocalization();
+        const auto title = fmt::format("{}###{}", loc.Get(m_name.c_str()), m_name);
+        if (ImGui::Begin(title.c_str(), &newEnabled))
             OnUpdate();
         ImGui::End();
     }

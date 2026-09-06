@@ -6,7 +6,7 @@
 #include <Utils.h>
 
 Console::Console(Options& aOptions, PersistentState& aPersistentState, LuaVM& aVm)
-    : Widget("Console")
+    : Widget("overlay.console")
     , m_options(aOptions)
     , m_persistentState(aPersistentState)
     , m_vm(aVm)

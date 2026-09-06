@@ -2,8 +2,10 @@
 
 #include "ImGuiDebug.h"
 
+#include <CET.h>
+
 ImGuiDebug::ImGuiDebug()
-    : Widget("ImGui Debug", true)
+    : Widget("overlay.imgui_debug", true)
 {
 }
 
@@ -24,7 +26,7 @@ void ImGuiDebug::OnUpdate()
 
     // add style editor block (not a window). you can pass in a reference ImGuiStyle structure to compare to, revert to
     // and save to (else it uses the default style)
-    ImGui::Begin("Dear ImGui Style Editor");
+    ImGui::Begin(CET::Get().GetLocalization().Get("imgui.style_editor"));
     ImGui::ShowStyleEditor(nullptr);
     ImGui::End();
 
