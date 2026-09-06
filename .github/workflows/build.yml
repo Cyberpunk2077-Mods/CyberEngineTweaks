@@ -38,6 +38,9 @@ jobs:
           $version = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { $stable = @(git tag -l --sort=-v:refname | Where-Object { $_ -match '^v?\d+\.\d+\.\d+$' }); $any = @(git tag -l --sort=-v:refname | Where-Object { $_ -match '^v?\d' }); $tag = $(@($stable + $any) | Select-Object -First 1); if ($tag) { $tag.TrimStart('v') } else { '0.0.0' } }
           $suffix = if ($env:GITHUB_REF_TYPE -eq 'tag') { '' } else { "_$(Get-Date -Format 'yyyy.M').$((git rev-list --count --since="$(Get-Date -Day 1 -Format yyyy-MM-dd)" HEAD))" }
           $artifact = "${env:MOD_NAME}_v${version}_${env:TARGET_PLATFORM}_${env:TARGET_ARCH}${suffix}.zip"
+          foreach ($required in @('package/bin/x64/plugins/cyber_engine_tweaks.asi', 'package/bin/x64/version.dll', 'package/bin/x64/global.ini', 'package/bin/x64/plugins/cyber_engine_tweaks/scripts', 'package/bin/x64/plugins/cyber_engine_tweaks/tweakdb/usedhashes.kark', 'package/bin/x64/plugins/cyber_engine_tweaks/tweakdb/tweakdbstr.kark')) {
+            if (-not (Test-Path -LiteralPath $required)) { throw "Missing package input: $required" }
+          }
           Compress-Archive -Path package/* -DestinationPath $artifact -CompressionLevel Optimal -Force
           "artifact=$artifact" >> $env:GITHUB_OUTPUT
       - uses: actions/upload-artifact@v4
