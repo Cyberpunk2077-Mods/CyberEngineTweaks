@@ -30,7 +30,7 @@
     "settings.interface": "Interface",
     "settings.language": "Language",
     "settings.language_auto": "Match game language",
-    "settings.language_tip": "First open follows the game language. Changing here is saved and reused on next launch.",
+    "settings.language_tip": "By default, CET follows the game language. A manual selection is saved and used on the next launch.",
     "settings.theme": "Theme",
     "settings.theme_default": "Default",
     "settings.theme_cyberpunk": "Cyberpunk",

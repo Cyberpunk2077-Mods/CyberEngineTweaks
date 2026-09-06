@@ -30,7 +30,7 @@
     "settings.interface": "介面",
     "settings.language": "語言",
     "settings.language_auto": "跟隨遊戲語言",
-    "settings.language_tip": "首次開啟時跟隨遊戲語言。在此變更後會儲存，下次啟動仍使用該設定。",
+    "settings.language_tip": "CET 預設跟隨遊戲語言。手動選擇的語言會儲存，並在下次啟動時使用。",
     "settings.theme": "主題",
     "settings.theme_default": "預設",
     "settings.theme_cyberpunk": "Cyberpunk",

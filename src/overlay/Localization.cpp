@@ -69,7 +69,7 @@ const std::pair<const char*, const char*> kEnglishDefaults[] = {
     {"settings.interface", "Interface"},
     {"settings.language", "Language"},
     {"settings.language_auto", "Match game language"},
-    {"settings.language_tip", "First open follows the game language. Changing here is saved and reused on next launch."},
+    {"settings.language_tip", "By default, CET follows the game language. A manual selection is saved and used on the next launch."},
     {"settings.theme", "Theme"},
     {"settings.theme_default", "Default"},
     {"settings.theme_cyberpunk", "Cyberpunk"},
@@ -219,45 +219,33 @@ std::string Localization::DetectGameOrSystemLanguage()
             {
                 std::ifstream file(optionsPath);
                 auto json = nlohmann::json::parse(file, nullptr, false);
-                // Best-effort scan for language-like string values
-                std::function<std::string(const nlohmann::json&)> findLang = [&](const nlohmann::json& node) -> std::string {
-                    if (node.is_string())
+                std::function<std::string(const nlohmann::json&)> findOnScreenLanguage = [&](const nlohmann::json& node) -> std::string {
+                    if (node.is_object())
                     {
-                        auto value = NormalizeLanguageCode(node.get<std::string>());
-                        for (const auto& lang : SupportedLanguages())
+                        if (node.value("name", "") == "OnScreen")
                         {
-                            if (value == lang.code)
-                                return value;
+                            const auto value = node.value("value", "");
+                            if (!value.empty())
+                                return NormalizeLanguageCode(value);
                         }
-                    }
-                    else if (node.is_object())
-                    {
-                        for (auto it = node.begin(); it != node.end(); ++it)
+
+                        for (const auto& child : node)
                         {
-                            const auto key = it.key();
-                            if (key.find("lang") != std::string::npos || key.find("Lang") != std::string::npos || key == "OnScreen")
-                            {
-                                auto nested = findLang(it.value());
-                                if (!nested.empty() && nested != "en-us")
-                                    return nested;
-                            }
-                            auto nested = findLang(it.value());
-                            if (!nested.empty() && nested != "en-us" && (key.find("lang") != std::string::npos || key.find("OnScreen") != std::string::npos))
-                                return nested;
+                            if (auto found = findOnScreenLanguage(child); !found.empty())
+                                return found;
                         }
                     }
                     else if (node.is_array())
                     {
                         for (const auto& child : node)
                         {
-                            auto nested = findLang(child);
-                            if (!nested.empty() && nested != "en-us")
-                                return nested;
+                            if (auto found = findOnScreenLanguage(child); !found.empty())
+                                return found;
                         }
                     }
                     return {};
                 };
-                if (auto found = findLang(json); !found.empty())
+                if (auto found = findOnScreenLanguage(json); !found.empty())
                     return found;
             }
         }

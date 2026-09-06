@@ -58,7 +58,7 @@ struct UISettings
 
     [[nodiscard]] auto operator<=>(const UISettings&) const = default;
 
-    // "auto" follows game/system language on first open until the user picks a language.
+    // "auto" follows the current game language on every launch, with the system language as fallback.
     std::string Language{"auto"};
     bool LanguageConfigured{false};
     std::string Theme{"Default"};
